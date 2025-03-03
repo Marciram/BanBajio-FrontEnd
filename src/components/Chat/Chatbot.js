@@ -1,4 +1,3 @@
-// src/components/Chatbot.js
 import React, { useState } from 'react';
 import useChatbot from './useChatbot';
 

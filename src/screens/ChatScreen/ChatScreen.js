@@ -6,7 +6,7 @@ import './ChatScreen.scss';
 const ChatScreen = () => {
   return (
     <div className="chat-screen">
-      <h1>Chat con BB Bot</h1>
+      <h1>Chatea con BB Bot!</h1>
       <Chatbot />
     </div>
   );

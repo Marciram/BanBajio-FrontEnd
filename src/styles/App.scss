@@ -1,3 +1,24 @@
+
+// App.scss
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; // Evita el scroll
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-image: url('../images/background.png'); // Ruta a tu imagen de fondo
+  background-size: cover; // Ajusta la imagen al tamaño de la pantalla
+  background-position: center; // Centra la imagen
+  //filter: blur(8px);
+  //-webkit-filter: blur(8px)
+}
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -5,11 +26,11 @@
   border-radius: 10px;
   padding: 20px;
   background-color: #f9f9f9;
-  width: 90vw; // 90% of the screen width
-  height: 90vh; // 90% of the screen height
-  max-width: 375px; // Max width (iPhone 8 size)
-  max-height: 667px; // Max height (iPhone 8 size)
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Shadow for elevation effect
+  width: 90vw; // 90% del ancho de la pantalla
+  height: 90vh; // 90% del alto de la pantalla
+  max-width: 375px; // Máximo ancho (tamaño de un iPhone 8)
+  max-height: 667px; // Máximo alto (tamaño de un iPhone 8)
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Sombra para dar efecto de elevación
 }
 
 .messages-container {
@@ -18,7 +39,7 @@
   flex: 1;
   overflow-y: auto;
   margin-bottom: 20px;
-  width: 100%; // 100% width of the container
+  width: 100%; // Ajusta el ancho al 100% del contenedor
 }
 
 .message {
