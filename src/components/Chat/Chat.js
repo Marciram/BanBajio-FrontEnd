@@ -1,42 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import useChatbot from './useChatbot'; // Importa el hook
 import Message from './Message';
-import './Chat.scss';
+import SendIcon from '../../images/send.svg';
 
 const Chat = () => {
-  const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
+  const { messages, isLoading, error, sendMessage } = useChatbot(); // Usa el hook
+  // Función para formatear el texto
+  const formatMessage = (text) => {
+    // Convertir **texto** a <strong>texto</strong>
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+    // Convertir * a <br />
+    formattedText = formattedText.replace(/\*/g, '<br />');
+  
+    // Convertir saltos de línea (\n) a <br />
+    formattedText = formattedText.replace(/\n/g, '<br />');
+  
+    return formattedText;
+  };
+  
 
-  // Función para enviar un mensaje al servidor Python
-  const sendMessage = async () => {
+
+  const handleSendMessage = async () => {
     if (inputText.trim() === '') return;
 
-    // Agregar el mensaje del usuario al chat
-    const userMessage = { text: inputText, sender: 'user' };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    // Llama a la función sendMessage del hook
+    await sendMessage(inputText);
     setInputText('');
-
-    try {
-      // Enviar el mensaje al servidor Python
-      const response = await axios.post('http://localhost:5000/chat', {
-        message: inputText,
-      });
-
-      // Agregar la respuesta del agente virtual al chat
-      const agentMessage = { text: response.data.response, sender: 'agent' };
-      setMessages((prevMessages) => [...prevMessages, agentMessage]);
-    } catch (error) {
-      console.error('Error al enviar el mensaje:', error);
-      const agentMessage = { text: 'Hubo un error al procesar tu mensaje.', sender: 'agent' };
-      setMessages((prevMessages) => [...prevMessages, agentMessage]);
-    }
   };
 
   return (
     <div className="chat-container">
       <div className="messages-container">
         {messages.map((message, index) => (
-          <Message key={index} text={message.text} sender={message.sender} />
+          <Message
+          key={index}
+          text={<span dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }} />}
+          sender={message.role === 'user' ? 'user' : 'agent'}
+        />
         ))}
       </div>
       <div className="input-container">
@@ -45,10 +47,13 @@ const Chat = () => {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder="Escribe tu mensaje..."
-          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
         />
-        <button onClick={sendMessage}>Enviar</button>
+        <button onClick={handleSendMessage} disabled={isLoading}>
+          <img src={SendIcon} alt="Enviar" />
+        </button>
       </div>
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };

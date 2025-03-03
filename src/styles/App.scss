@@ -29,27 +29,41 @@ body, html {
   width: 90vw; // 90% del ancho de la pantalla
   height: 90vh; // 90% del alto de la pantalla
   max-width: 375px; // Máximo ancho (tamaño de un iPhone 8)
-  max-height: 667px; // Máximo alto (tamaño de un iPhone 8)
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Sombra para dar efecto de elevación
+  max-height: 767px; // Máximo alto (tamaño de un iPhone 8)
+  box-shadow: 0 14px 18px rgba(0, 0, 0, 0.2); 
+  overflow: hidden;
 }
 
 .messages-container {
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; // Scroll vertical para el contenido excedente
+  overflow-x: hidden; // Evita el scroll horizontal
   margin-bottom: 20px;
-  width: 100%; // Ajusta el ancho al 100% del contenedor
+  width: 100%;
+  padding: 10px;
+  gap: 10px;
 }
 
+
 .message {
+  height: auto; // Ajusta la altura al contenido del mensaje
   margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 10px;
+  padding: .005px 10px;
+  border-radius: 20px;
+  width: auto; // Ajusta el ancho al contenido del mensaje
+  word-wrap: break-word; // Fuerza el ajuste de línea en palabras largas
+  overflow-wrap: break-word; // Asegura el ajuste de línea en palabras largas
+  box-sizing: border-box; // Asegura que el relleno y borde se incluyan en el tamaño total
+  line-height: 1; // Altura de línea ajustada para que el mensaje no sea tan alto
   max-width: 70%;
+  min-width: 120px; // Tamaño mínimo para los mensajes
+  min-height: 40px; // Asegura un mínimo de altura para manejar mensajes muy cortos
 }
 
 .message.user {
+  height: auto;
   background-color: #995db9;
   color: white;
   align-self: flex-end;
@@ -58,16 +72,17 @@ body, html {
 }
 
 .message.agent {
+  height: auto;
   background-color: #e9ecef;
   color: black;
   align-self: flex-start;
   max-width: 300px;
   text-wrap: wrap;
 }
-
+/*
 .input-container {
   display: flex;
-  gap: 10px;
+  gap: 5px;
 }
 
 .input-container input {
@@ -88,4 +103,58 @@ body, html {
 
 .input-container button:hover {
   background-color: #0056b3;
+}*/
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f9f9f9; // Fondo claro para el contenedor
+  border-top: 1px solid #e0e0e0; // Línea divisoria superior
+
+  input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px; // Bordes redondeados
+    outline: none;
+    font-size: 16px;
+    background-color: white; // Fondo blanco para el input
+    transition: border-color 0.3s;
+
+    &:focus {
+      border-color: #995db9; // Cambia el color del borde al enfocar
+    }
+
+    &::placeholder {
+      color: #999; // Color del placeholder
+    }
+  }
+
+  button {
+    background-color: #995db9; // Color de fondo del botón
+    border: none;
+    border-radius: 50%; // Botón circular
+    width: 40px; // Tamaño fijo
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #0056b3; // Color al pasar el mouse
+    }
+    img {
+      width: 40px; // Ajusta el tamaño del ícono
+      height: 40px;
+      filter: brightness(0) invert(1); // Cambia el color del ícono a blanco
+    }
+
+    span {
+      font-size: 18px;
+      color: white; // Color del ícono
+    }
+  }
 }

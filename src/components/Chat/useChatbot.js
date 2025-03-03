@@ -1,7 +1,12 @@
 import { useState, useCallback } from 'react';
 
 const useChatbot = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      role: 'agent', // El mensaje proviene del agente (chatbot)
+      content: '¡Hola! Soy el BB BOT, tu agente virtual de servicio al cliente. ¿En qué puedo ayudarte hoy?',
+    },
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
