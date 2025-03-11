@@ -21,37 +21,67 @@ const useChatbot = () => {
         { role: 'user', content: userMessage },
       ]);
 
-      // Make the API request to the new endpoint
-      const response = await fetch(
-        'https://banbajio-backend-753741223620.us-central1.run.app/chat?', // Cloud Run URL
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: userMessage, // Updated payload structure
-          }),
-        }
-      );
+      // Create a new assistant message placeholder
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: 'assistant', content: '' },
+      ]);
+
+      // Make the API request to the backend
+      const response = await fetch('https://banbajio-backend-753741223620.us-central1.run.app/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+        }),
+      });
 
       if (!response.ok) {
-        const errorData = await response.json(); // attempt to get error details from the response
+        const errorData = await response.json();
         throw new Error(`Failed to fetch response: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
-      // Parse the response
-      const data = await response.json();
+      // Handle streaming response
+      const reader = response.body.getReader();
+      let assistantMessage = '';
 
-      // Extract the assistant's message from the response
-      const assistantMessage = data.message; // Assuming the response has a "message" field
+      while (true) {
+        const { done, value } = await reader.read();
 
-      // Add the assistant's message to the messages state
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: 'assistant', content: assistantMessage },
-      ]);
+        if (done) {
+          break;
+        }
 
+        const chunk = new TextDecoder().decode(value);
+        try {
+          const parsedChunk = JSON.parse(chunk);
+
+          if (parsedChunk.message?.content) {
+            assistantMessage += parsedChunk.message.content;
+          }
+
+          // Update the assistant's message incrementally
+          setMessages((prevMessages) => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+
+            if (lastMessage?.role === 'assistant') {
+              return [
+                ...prevMessages.slice(0, -1),
+                { role: 'assistant', content: assistantMessage },
+              ];
+            } else {
+              return [
+                ...prevMessages,
+                { role: 'assistant', content: assistantMessage },
+              ];
+            }
+          });
+        } catch (parseError) {
+          console.error('Error parsing chunk:', chunk, parseError);
+        }
+      }
     } catch (err) {
       setError(err.message);
     } finally {
