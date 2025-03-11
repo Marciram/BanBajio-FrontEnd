@@ -15,70 +15,44 @@ const useChatbot = () => {
     setError(null);
 
     try {
-      // Add the user message to the chat
+      // Add the user's message to the messages state
       setMessages((prevMessages) => [
         ...prevMessages,
         { role: 'user', content: userMessage },
       ]);
 
+      // Make the API request to the new endpoint
       const response = await fetch(
-        'https://proxy-frontend-753741223620.us-central1.run.app/api/chat', // Replace with your proxy server URL
+        'https://banbajio-backend-753741223620.us-central1.run.app/chat?', // Cloud Run URL
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'bb-bot',
-            messages: [{ role: 'user', content: userMessage }],
+            message: userMessage, // Updated payload structure
           }),
         }
       );
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch response: ${response.status} - ${errorText}`);
+        const errorData = await response.json(); // attempt to get error details from the response
+        throw new Error(`Failed to fetch response: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
-      const reader = response.body.getReader();
-      let assistantMessage = '';
+      // Parse the response
+      const data = await response.json();
 
-      while (true) {
-        const { done, value } = await reader.read();
+      // Extract the assistant's message from the response
+      const assistantMessage = data.message; // Assuming the response has a "message" field
 
-        if (done) {
-          break;
-        }
+      // Add the assistant's message to the messages state
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: 'assistant', content: assistantMessage },
+      ]);
 
-        const chunk = new TextDecoder().decode(value);
-        try {
-          const parsedChunk = JSON.parse(chunk);
-
-          if (parsedChunk.message?.content) {
-            assistantMessage += parsedChunk.message.content;
-          }
-
-          setMessages((prevMessages) => {
-            const lastMessage = prevMessages[prevMessages.length - 1];
-
-            if (lastMessage?.role === 'assistant') {
-              return [
-                ...prevMessages.slice(0, -1),
-                { role: 'assistant', content: assistantMessage },
-              ];
-            } else {
-              return [
-                ...prevMessages,
-                { role: 'assistant', content: assistantMessage },
-              ];
-            }
-          });
-        } catch (parseError) {
-          console.error("error parsing chunk:", chunk, parseError);
-        }
-      }
     } catch (err) {
-      console.error("Request error:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
