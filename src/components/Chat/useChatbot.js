@@ -15,35 +15,33 @@ const useChatbot = () => {
     setError(null);
 
     try {
-      // Add the user's message to the messages state
+
       setMessages((prevMessages) => [
         ...prevMessages,
         { role: 'user', content: userMessage },
       ]);
 
-      // Create a new assistant message placeholder
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: 'assistant', content: '' },
-      ]);
-
-      // Make the API request to the backend
-      const response = await fetch('https://banbajio-backend-753741223620.us-central1.run.app/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-        }),
-      });
+      const response = await fetch(
+        //'https://ollama-bb-bot-753741223620.us-central1.run.app/api/chat', // Cloud Run URL
+        'https://banbajio-backend-753741223620.us-central1.run.app/chat?',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            //model: 'bb-bot',
+            //messages: [{ role: 'user', content: userMessage }],
+            message: userMessage,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json(); // attempt to get error details from the response
         throw new Error(`Failed to fetch response: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
-      // Handle streaming response
       const reader = response.body.getReader();
       let assistantMessage = '';
 
@@ -55,14 +53,13 @@ const useChatbot = () => {
         }
 
         const chunk = new TextDecoder().decode(value);
-        try {
+        try{
           const parsedChunk = JSON.parse(chunk);
 
           if (parsedChunk.message?.content) {
             assistantMessage += parsedChunk.message.content;
           }
 
-          // Update the assistant's message incrementally
           setMessages((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
 
@@ -78,11 +75,13 @@ const useChatbot = () => {
               ];
             }
           });
-        } catch (parseError) {
-          console.error('Error parsing chunk:', chunk, parseError);
+        } catch (parseError){
+          console.error("error parsing chunk:", chunk, parseError);
         }
+
       }
     } catch (err) {
+
       setError(err.message);
     } finally {
       setIsLoading(false);
