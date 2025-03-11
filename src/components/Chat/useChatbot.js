@@ -15,13 +15,14 @@ const useChatbot = () => {
     setError(null);
 
     try {
+      // Add the user message to the chat
       setMessages((prevMessages) => [
         ...prevMessages,
         { role: 'user', content: userMessage },
       ]);
 
       const response = await fetch(
-        'https://ollama-bb-bot-753741223620.us-central1.run.app/api/chat', // Cloud Run URL
+        'https://proxy-frontend-753741223620.us-central1.run.app/api/chat', // Replace with your proxy server URL
         {
           method: 'POST',
           headers: {
@@ -35,8 +36,8 @@ const useChatbot = () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json(); // attempt to get error details from the response
-        throw new Error(`Failed to fetch response: ${response.status} - ${JSON.stringify(errorData)}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch response: ${response.status} - ${errorText}`);
       }
 
       const reader = response.body.getReader();
@@ -50,7 +51,7 @@ const useChatbot = () => {
         }
 
         const chunk = new TextDecoder().decode(value);
-        try{
+        try {
           const parsedChunk = JSON.parse(chunk);
 
           if (parsedChunk.message?.content) {
@@ -72,12 +73,12 @@ const useChatbot = () => {
               ];
             }
           });
-        } catch (parseError){
+        } catch (parseError) {
           console.error("error parsing chunk:", chunk, parseError);
         }
-
       }
     } catch (err) {
+      console.error("Request error:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
